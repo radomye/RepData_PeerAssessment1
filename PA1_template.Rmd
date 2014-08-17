@@ -12,24 +12,18 @@ rawData <- read.csv("activity.csv")
 
 ## What is mean total number of steps taken per day?
 
-First, we should remove the missing values.
-```{r}
-completedData <- complete.cases(rawData)
-withoutNaData <- rawData[completedData,]
-```
-
-Then we calculate the total number of steps taken each day and make a histogram.
+First, we calculate the total number of steps taken each day and make a histogram.
 
 ```{r}
-totalDailySteps1 <- tapply(withoutNaData$steps, withoutNaData$date, sum)
-hist(totalDailySteps1)
+totalDailySteps1 <- tapply(rawData$steps, rawData$date, sum)
+hist(totalDailySteps1, main = "Histogram of the total number of steps taken each day", xlab = "Total number of steps")
 ```
 
 Next, we calculate the mean and median total numbers of steps taken per day.
 
 ```{r}
-meanDailySteps1 <- tapply(withoutNaData$steps, withoutNaData$date, mean)
-medianDailySteps1 <- tapply(withoutNaData$steps, withoutNaData$date, median)
+meanDailySteps1 <- mean(totalDailySteps1, na.rm = TRUE)
+medianDailySteps1 <- median(totalDailySteps1, na.rm = TRUE)
 ```
 
 So the mean total numbers of steps taken per day is:
@@ -44,7 +38,13 @@ print(medianDailySteps1)
 
 ## What is the average daily activity pattern?
 
-First, we should calculate the average number of steps taken per interval.
+First, we should remove the missing values.
+```{r}
+completedData <- complete.cases(rawData)
+withoutNaData <- rawData[completedData,]
+```
+
+Then we should calculate the average number of steps taken per interval.
 ```{r}
 averageIntervalSteps <- tapply(withoutNaData$steps, withoutNaData$interval, mean)
 ```
@@ -53,7 +53,10 @@ Then make the time series plot.
 ```{r}
 averageIntervalSteps <- ldply(as.list(averageIntervalSteps), paste)
 names(averageIntervalSteps) <- c("interval", "averagesteps")
-plot(averageIntervalSteps$interval, averageIntervalSteps$averagesteps, type = "l")
+averageIntervalSteps$interval <- as.numeric(averageIntervalSteps$interval)
+averageIntervalSteps$averagesteps <- as.numeric(averageIntervalSteps$averagesteps)
+plot(averageIntervalSteps$interval, averageIntervalSteps$averagesteps, 
+     type = "l", xlab = "Interval", ylab = "Average number of steps")
 ```
 
 So, the 5-minute interval that contains the maximum number of step is :
@@ -87,13 +90,13 @@ for (i in 1:nrow(rawData)) {
 Next, we make a histogram of the total number of steps taken each day.
 ```{r}
 totalDailySteps2 <- tapply(rawData$steps, rawData$date, sum)
-hist(totalDailySteps2)
+hist(totalDailySteps2, main = "Histogram of the total number of steps taken each day", xlab = "Total number of steps")
 ```
 
 And calculate the mean and median total number of steps taken per day.
 ```{r}
-meanDailySteps2 <- tapply(rawData$steps, rawData$date, mean)
-medianDailySteps2 <- tapply(rawData$steps, rawData$date, median)
+meanDailySteps2 <- mean(totalDailySteps2, na.rm = TRUE)
+medianDailySteps2 <- mean(totalDailySteps2, na.rm = TRUE)
 ```
 
 So the mean total numbers of steps taken per day is:
@@ -105,6 +108,8 @@ And the median total numbers of steps taken per day is :
 ```{r echo=FALSE}
 print(medianDailySteps2)
 ```
+
+When filling in all of the missing values with int **1**, the mean and median total number of steps taken per day are different from the first part of the assignment.Because those days with missing values won't be calculated in the mean and median total number of steps taken per day.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
@@ -142,7 +147,7 @@ avergeSteps$interval <- as.numeric(avergeSteps$interval)
 avergeSteps$steps <- as.numeric(avergeSteps$steps)
 avergeSteps$weekdayData <- as.factor(avergeSteps$weekdayData)
 
-xyplot(avergeSteps$steps ~ avergeSteps$interval | avergeSteps$weekdayData, layout = c(1,2),
+xyplot(avergeSteps$steps ~ avergeSteps$interval | avergeSteps$weekdayData, layout = c(1,2), xlab = "Interval", ylab = "Numbers of steps",
        panel = function(x, y){
                panel.xyplot(x, y, type = "l")
        })
